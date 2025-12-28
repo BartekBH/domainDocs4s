@@ -4,7 +4,7 @@ import domaindocs4s.errors.DomainDocsArgError
 import tastyquery.{Contexts, Symbols}
 import tastyquery.Contexts.Context
 import tastyquery.Symbols.{DeclaringSymbol, Symbol, TermSymbol}
-import tastyquery.Trees.{Literal, Select}
+import tastyquery.Trees._
 
 import scala.collection.mutable.ListBuffer
 
@@ -69,7 +69,9 @@ class TastyQueryCollector(using ctx: Context) extends Collector {
               annot.arguments(index) match {
                 case Literal(constant) => Some(constant.stringValue)
                 case Select(_, termName) if termName.toString == s"<init>$$default$$${index + 1}" => None
-                case _ => throw DomainDocsArgError(label, symbol.displayFullName)
+                case Inlined(Literal(constant), _, _) => Some(constant.stringValue) // handles values inlined to literals
+                case Inlined(Inlined(Literal(constant), _, _), _, _) => Some(constant.stringValue) // handles inlined macros
+                case other => throw DomainDocsArgError(label, symbol.displayFullName, other)
               }
             }
 

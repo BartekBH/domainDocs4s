@@ -1,6 +1,9 @@
 package domaindocs4s.errors
 
-final case class DomainDocsArgError(label: String, symbol: String)
+import tastyquery.Trees.TermTree
+
+final case class DomainDocsArgError(label: String, symbol: String, tree: TermTree)
     extends RuntimeException(
-      s"@domainDoc annotation: argument '$label' on $symbol must be a constant string literal",
+      // for dynamic content experiments: prints the tree when it's not handled by the Collector
+      s"@domainDoc: ${tree}",
     )
